@@ -1,5 +1,9 @@
 #include <algorithm>
-#include <cassert>
+//#ifndef __WASM__
+//#include <cassert>
+//#else
+#define assert Com_Error
+//#endif
 #include <fstream>
 #include <iostream>
 #include <sstream>

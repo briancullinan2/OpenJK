@@ -4,6 +4,11 @@
  */
 
 #include "gzguts.h"
+#if defined(WASI)
+ssize_t write(int fd, const void *buf, size_t count);
+int close(int fd);
+#endif
+
 
 /* Local functions */
 local int gz_init OF((gz_statep));

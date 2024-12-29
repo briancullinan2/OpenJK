@@ -49,7 +49,9 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 
 	if (NOT WIN32)
 		# OpenGL
-		find_package(OpenGL REQUIRED)
+		if (NOT WASI)
+			find_package(OpenGL REQUIRED)
+		endif()
 		set(SPEngineIncludeDirectories ${SPEngineIncludeDirectories} ${OPENGL_INCLUDE_DIR})
 		set(SPEngineLibraries ${SPEngineLibraries} ${OPENGL_LIBRARIES})
 	endif()
@@ -78,6 +80,7 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		set(SPEngineFiles ${SPEngineFiles} ${SPEngineEAXFiles})
 	endif()
 
+	if(NOT WASI)
 	if(UseInternalSDL2)
 		if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 			set(SPEngineLibraries
@@ -107,6 +110,7 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		set(SPEngineIncludeDirectories ${SPEngineIncludeDirectories} ${SDL2_INCLUDE_DIRS})
 		set(SPEngineLibraries ${SPEngineLibraries} ${SDL2_LIBRARIES})
 	endif()
+	endif() # ! WASI
 
 	#    Source Files
 
@@ -343,20 +347,23 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		set(SPEngineFiles ${SPEngineFiles} ${SPEngineWin32Files})
 	endif()
 
-	set(SPEngineSysFiles
-		"${SharedDir}/sys/sys_main.cpp"
-		"${SharedDir}/sys/sys_event.cpp"
-		"${SharedDir}/sys/sys_local.h"
-		"${SharedDir}/sys/sys_public.h"
-		"${SharedDir}/sys/sys_loadlib.h"
-		"${SharedDir}/sys/con_local.h"
-		"${SharedDir}/sys/con_log.cpp"
-		"${SharedDir}/sdl/sdl_qgl.h"
-		"${SharedDir}/sdl/sdl_sound.cpp"
-		"${SharedDir}/sdl/sdl_input.cpp"
-		"${SharedDir}/sdl/sdl_window.cpp"
-		"${SharedDir}/sdl/sdl_icon.h"
-		)
+	if(NOT WASI)
+		set(SPEngineSysFiles
+			"${SharedDir}/sys/sys_main.cpp"
+			"${SharedDir}/sys/sys_event.cpp"
+			"${SharedDir}/sys/sys_local.h"
+			"${SharedDir}/sys/sys_public.h"
+			"${SharedDir}/sys/sys_loadlib.h"
+			"${SharedDir}/sys/con_local.h"
+			"${SharedDir}/sys/con_log.cpp"
+			"${SharedDir}/sdl/sdl_qgl.h"
+			"${SharedDir}/sdl/sdl_sound.cpp"
+			"${SharedDir}/sdl/sdl_input.cpp"
+			"${SharedDir}/sdl/sdl_window.cpp"
+			"${SharedDir}/sdl/sdl_icon.h"
+			)
+	else()
+	endif()
 
 	if(WIN32)
 		set(SPEngineSysFiles
@@ -364,12 +371,14 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 			"${SharedDir}/sys/sys_win32.cpp"
 			"${SharedDir}/sys/con_passive.cpp"
 			)
-	else()
+	elseif(NOT WASI)
 		set(SPEngineSysFiles
 			${SPEngineSysFiles}
 			"${SharedDir}/sys/sys_unix.cpp"
 			"${SharedDir}/sys/con_tty.cpp"
 			)
+	else()
+
 	endif()
 
 	source_group("sys" FILES ${SPEngineSysFiles})
@@ -448,6 +457,8 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 			target_link_libraries(${ProjectName} ${SPEngineLibraries})
 		endif(SPEngineLibraries)
 	endfunction(add_sp_project)
+
+
 	if(BuildSPEngine)
 		add_sp_project(${SPEngine} "SP Client" ${SPDir} ${JKAInstallDir} ${JKASPClientComponent})
 	endif(BuildSPEngine)
@@ -455,5 +466,14 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		set(SPEngineDefines ${SPEngineDefines} "JK2_MODE")
 		add_sp_project(${JK2SPEngine} "JK2 SP Client" ${JK2SPDir} ${JK2InstallDir} ${JK2SPClientComponent})
 	endif(BuildJK2SPEngine)
+
+	if(WASI)
+		if(BuildSPEngine)
+			set_target_properties(${SPEngine} PROPERTIES SUFFIX ".wasm")
+		endif()
+		if(BuildJK2SPEngine)
+			set_target_properties(${JK2SPEngine} PROPERTIES SUFFIX ".wasm")
+		endif()
+	endif()
 
 endif(BuildSPEngine OR BuildJK2SPEngine)

@@ -364,7 +364,9 @@ if(BuildMPEngine)
 
 	if (NOT WIN32)
 		# OpenGL
-		find_package(OpenGL REQUIRED)
+		if (NOT WASI)
+			find_package(OpenGL REQUIRED)
+		endif()
 		set(MPEngineIncludeDirectories ${MPEngineIncludeDirectories} ${OPENGL_INCLUDE_DIR})
 		set(MPEngineLibraries ${MPEngineLibraries} ${OPENGL_LIBRARIES})
 	endif()
@@ -386,6 +388,7 @@ if(BuildMPEngine)
 		endif(UseInternalOpenAL)
 	endif()
 
+	if(NOT WASI)
 	if(UseInternalSDL2)
 		if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 			set(MPEngineLibraries
@@ -414,6 +417,10 @@ if(BuildMPEngine)
 		string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 		set(MPEngineIncludeDirectories ${MPEngineIncludeDirectories} ${SDL2_INCLUDE_DIRS})
 		set(MPEngineLibraries ${MPEngineLibraries} ${SDL2_LIBRARIES})
+	endif()
+
+	else()
+
 	endif()
 
 	# EAX is Windows-Only (right?)
@@ -520,6 +527,7 @@ if(BuildMPEngine)
 	source_group("mp3code" FILES ${MPEngineMp3Files})
 	set(MPEngineFiles ${MPEngineFiles} ${MPEngineMp3Files})
 
+	if(NOT WASI)
 	set(MPEngineSysFiles
 		"${SharedDir}/sdl/sdl_window.cpp"
 		"${SharedDir}/sdl/sdl_icon.h"
@@ -557,6 +565,10 @@ if(BuildMPEngine)
 			"${SharedDir}/sys/con_tty.cpp"
 			)
 	endif(WIN32)
+
+	else()
+
+	endif() # ! WASI
 
 	set(MPEngineFiles ${MPEngineFiles} ${MPEngineSysFiles})
 	source_group("sys" FILES ${MPEngineSysFiles})
@@ -624,6 +636,11 @@ if(BuildMPEngine)
 	set_target_properties(${MPEngine} PROPERTIES INCLUDE_DIRECTORIES "${MPEngineIncludeDirectories}")
 	set_target_properties(${MPEngine} PROPERTIES PROJECT_LABEL "MP Client")
 	target_link_libraries(${MPEngine} ${MPEngineLibraries})
+
+	if(WASI)
+	set_target_properties(${MPEngine} PROPERTIES SUFFIX ".wasm")
+	endif()
+
 endif(BuildMPEngine)
 
 #        Dedicated Server (Engine) (jampded.exe)

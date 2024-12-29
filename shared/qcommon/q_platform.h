@@ -115,6 +115,25 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
     #define DLL_EXT ".dylib"
 
+// MAC OS X
+#elif defined(WASI)
+
+	// make sure this is defined, just for sanity's sake...
+	#ifndef __WASM__
+		#define __WASM__
+	#endif
+
+	#define OS_STRING "webassembly"
+	#define QINLINE inline
+	#define	PATH_SEP '/'
+
+	#ifndef ARCH_STRING
+		#define ARCH_STRING "js"
+	#endif
+	#define Q3_LITTLE_ENDIAN
+
+	#define DLL_EXT ".wasm"
+
 // Linux
 #elif defined(__linux__) || defined(__FreeBSD_kernel__)
 

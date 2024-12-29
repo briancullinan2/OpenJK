@@ -20,6 +20,12 @@
 #	if defined(__FX__)
 #		include <GL/fxmesa.h>
 #	endif
+#elif defined(__WASM__)
+#include "../wasm/gl.h"
+#undef GL_RGBA8
+#define GL_RGBA8 GL_RGBA
+#undef GL_RGB8
+#define GL_RGB8 GL_RGB
 #else
 #	include <gl.h>
 #endif

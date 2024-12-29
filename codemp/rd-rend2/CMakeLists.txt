@@ -133,7 +133,9 @@ list(APPEND MPRend2Libraries          ${ZLIB_LIBRARIES})
 list(APPEND MPRend2IncludeDirectories ${MINIZIP_INCLUDE_DIRS})
 list(APPEND MPRend2Libraries          ${MINIZIP_LIBRARIES})
 
-find_package(OpenGL REQUIRED)
+if (NOT WASI)
+	find_package(OpenGL REQUIRED)
+endif()
 set(MPRend2IncludeDirectories ${MPRend2IncludeDirectories} ${OPENGL_INCLUDE_DIR})
 set(MPRend2Libraries ${MPRend2Libraries} ${OPENGL_LIBRARIES})
 
@@ -188,6 +190,12 @@ add_executable(compact_glsl
 	${MPDir}/rd-rend2/tr_allocator.cpp
 	${MPDir}/rd-rend2/tr_allocator.h
 	${MPDir}/rd-rend2/tr_glsl_parse.cpp)
+if (WASI)
+	target_link_libraries(compact_glsl ${WASI_SDK_PREFIX}share/wasi-sysroot/lib/wasm32-wasi/libc++abi.a)
+	target_link_libraries(compact_glsl ${WASI_SDK_PREFIX}share/wasi-sysroot/lib/wasm32-wasi/libc++experimental.a)
+	target_link_libraries(compact_glsl ${WASI_SDK_PREFIX}lib/clang/18/lib/wasi/libclang_rt.builtins-wasm32.a)
+	add_definitions(-DWASI=1)
+endif()
 target_compile_definitions(compact_glsl PRIVATE "GLSL_BUILDTOOL" "NOMINMAX")
 if (NOT WIN32 AND NOT APPLE)
 	target_compile_definitions(compact_glsl PRIVATE "ARCH_STRING=\"${Architecture}\"")

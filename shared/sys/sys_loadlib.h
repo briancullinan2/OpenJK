@@ -35,13 +35,22 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #		define Sys_LoadFunction(h,fn) dlsym(h,fn)
 #		define Sys_LibraryError() dlerror()
 #	endif
-#else
+#elif !defined(__WASM__)
 #	include <SDL.h>
 #	include <SDL_loadso.h>
 #	define Sys_LoadLibrary(f) SDL_LoadObject(f)
 #	define Sys_UnloadLibrary(h) SDL_UnloadObject(h)
 #	define Sys_LoadFunction(h,fn) SDL_LoadFunction(h,fn)
 #	define Sys_LibraryError() SDL_GetError()
+#else
+extern void *dlopen(const char *filename, int flags);
+extern int dlclose(void *handle);
+extern char *dlerror(void);
+extern void *dlsym(void *handle, const char *symbol);
+#define Sys_LoadLibrary(f) dlopen(f,RTLD_NOW)
+#define Sys_UnloadLibrary(h) dlclose(h)
+#define Sys_LoadFunction(h,fn) dlsym(h,fn)
+#define Sys_LibraryError() dlerror()
 #endif
 
 void * QDECL Sys_LoadDll(const char *name, qboolean useSystemLib);

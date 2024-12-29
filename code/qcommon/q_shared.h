@@ -862,7 +862,7 @@ typedef struct
 #define MAX_SABER_TRAIL_SEGS 8
 
 // !!!!!!!!!!!!! loadsave affecting struct !!!!!!!!!!!!!!!
-typedef struct
+typedef struct bladeInfo_s
 {
 	qboolean	active;
 	saber_colors_t	color;
@@ -2338,7 +2338,7 @@ typedef enum {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
 	TR_GRAVITY
 } trType_t;
 
-typedef struct {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
+typedef struct trajectory_s {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
 	trType_t	trType;
 	int		trTime;
 	int		trDuration;			// if non 0, trTime + trDuration = stop time

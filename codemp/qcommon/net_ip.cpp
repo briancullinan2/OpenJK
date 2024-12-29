@@ -24,6 +24,17 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include "qcommon/qcommon.h"
 
+#ifdef __WASM__
+#define FD_SETSIZE 1024
+typedef struct {
+	unsigned long fds_bits[FD_SETSIZE / 8 / sizeof(long)];
+} fd_set;
+
+int NET_OpenIP(void);
+int NET_GetPacket( netadr_t *net_from, msg_t *net_message, const fd_set *fdr );
+
+#else
+
 #ifdef _WIN32
 	#include <winsock.h>
 
@@ -80,6 +91,8 @@ typedef int SOCKET;
 
 #endif
 
+#endif
+
 static qboolean usingSocks = qfalse;
 static qboolean networkingEnabled = qfalse;
 
@@ -96,6 +109,8 @@ static cvar_t	*net_ip;
 static cvar_t	*net_port;
 
 static cvar_t	*net_dropsim;
+
+#ifndef __WASM__
 
 static struct sockaddr_in	socksRelayAddr;
 
@@ -847,6 +862,8 @@ void NET_OpenIP( void )
 
 //===================================================================
 
+#endif
+
 /*
 ====================
 NET_GetCvars
@@ -938,6 +955,7 @@ void NET_Config( qboolean enableNetworking ) {
 		networkingEnabled = enableNetworking;
 	}
 
+#ifndef __WASM__
 	if ( stop ) {
 		if ( ip_socket != INVALID_SOCKET ) {
 			closesocket( ip_socket );
@@ -949,6 +967,7 @@ void NET_Config( qboolean enableNetworking ) {
 			socks_socket = INVALID_SOCKET;
 		}
 	}
+#endif
 
 	if ( start ) {
 		if ( net_enabled->integer )
@@ -1032,6 +1051,8 @@ void NET_Event(fd_set *fdr)
 	}
 }
 
+#ifndef __WASM__
+
 /*
 ====================
 NET_Sleep
@@ -1074,6 +1095,8 @@ void NET_Sleep( int msec ) {
 	else if(retval > 0)
 		NET_Event(&fdset);
 }
+
+#endif
 
 /*
 ====================

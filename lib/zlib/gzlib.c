@@ -10,6 +10,10 @@
 #else
 #if defined(_LARGEFILE64_SOURCE) && _LFS64_LARGEFILE-0
 #  define LSEEK lseek64
+#elif defined(WASI)
+int close(int fd);
+off_t lseek(int fd, off_t offset, int whence);
+#  define LSEEK lseek
 #else
 #  define LSEEK lseek
 #endif

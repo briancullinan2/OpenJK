@@ -5,6 +5,11 @@
 
 #include "gzguts.h"
 
+#if defined(WASI)
+ssize_t read(int fd, void *buf, size_t count);
+int close(int fd);
+#endif
+
 /* Local functions */
 local int gz_load OF((gz_statep, unsigned char *, unsigned, unsigned *));
 local int gz_avail OF((gz_statep));

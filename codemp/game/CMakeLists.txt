@@ -215,6 +215,10 @@ if(NOT MSVC)
 	set_target_properties(${MPGame} PROPERTIES PREFIX "")
 endif()
 
+if(WASI)
+	set_target_properties(${MPGame} PROPERTIES SUFFIX ".wasm")
+endif()
+
 if(MakeApplicationBundles AND BuildMPEngine)
 	install(TARGETS ${MPGame}
 		LIBRARY
